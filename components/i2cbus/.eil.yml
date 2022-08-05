@@ -1,0 +1,19 @@
+---
+components:
+  - name: i2cbus
+    description: |
+      I2C controller.
+    group: peripherals
+    groups: []
+    code_owners:
+      - name: MuriloAM
+    depends:
+      - name: i2c.h
+    thread_safe: yes
+    targets:
+      - name: esp32
+    licenses:
+      - name: MIT
+    copyrights:
+      - name: MuriloAM
+        year: 2022

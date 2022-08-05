@@ -1,0 +1,21 @@
+---
+components:
+  - name: lcd_i2c
+    description: |
+      LCD driver based on 1602A
+    group: driver
+    groups: []
+    code_owners:
+      - name: MuriloAM
+    depends:
+      - name: i2cbus
+    thread_safe: yes
+    targets:
+      - name: esp32
+      - name: esp32s2
+      - name: esp32c3
+    licenses:
+      - name: MIT
+    copyrights:
+      - name: MuriloAM
+        year: 2022

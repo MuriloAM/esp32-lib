@@ -1,0 +1,33 @@
+menu "LCD_I2C"
+	config LCD_OUTPUT_ENABLE
+        bool "Enable LCD output."
+        help
+            Select this if your board has a LCD.
+    
+	config LCD_ADDRESS
+        depends on LCD_OUTPUT_ENABLE
+		hex "I2C address of lcd based on PCF8574A"
+        range 0x38 0x3F
+		default 0x3F
+        help
+            Time (in seconds) after which the Wi-Fi provisioning manager will auto-stop after connecting to
+            a Wi-Fi network successfully.
+
+	config LCD_MAX_NUM
+		int "Maximum number of lcd displays"
+		default 1
+	
+	# config LCD_TIMEOUT
+	# 	prompt "Timeout to consider lcd disconected from i2cbus (ms)"
+	# 	default 200
+    #     range 200 1000
+
+    config LCD_TIMEOUT
+        depends on LCD_OUTPUT_ENABLE
+        int "Timeout to consider lcd disconected from i2cbus (ms)"
+        range 100 1500
+        default 1000
+        help
+            Define the max period to lcd answare in milliseconds.
+
+endmenu

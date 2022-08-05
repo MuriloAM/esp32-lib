@@ -1,0 +1,21 @@
+---
+components:
+  - name: esp_component
+    description: |
+      Model for new esp32 component
+    group: group of this component
+    groups: []
+    code_owners:
+      - name: OwnerName
+    depends:
+      - name: insert component dependences here
+    thread_safe: yes/no
+    targets:
+      - name: esp32
+      - name: esp32s2
+      - name: esp32c3
+    licenses:
+      - name: MIT
+    copyrights:
+      - name: YourName
+        year: Year

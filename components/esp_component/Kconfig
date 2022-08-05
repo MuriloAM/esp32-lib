@@ -1,0 +1,27 @@
+menu "esp_component"
+
+	config ESP_COMPONENT_MAX
+		int "Maximum number of rotary encoders"
+		default 1
+			
+	config ESP_COMPONENT_INTERVAL_US
+		int "Polling interval, us"
+		default 1000
+		
+	config ESP_COMPONENT_BTN_DEAD_TIME_US
+		int "Button dead time, us"
+		default 10000
+			
+	choice ESP_COMPONENT_BTN_PRESSED_LEVEL
+		prompt "Logical level on pressed button"
+		config ESP_COMPONENT_BTN_PRESSED_LEVEL_0
+			bool "0"
+		config ESP_COMPONENT_BTN_PRESSED_LEVEL_1
+			bool "1"
+	endchoice
+	
+	config ESP_COMPONENT_BTN_LONG_PRESS_TIME_US
+		int "Long press timeout, us"
+		default 500000
+
+endmenu

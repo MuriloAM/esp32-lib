@@ -38,11 +38,29 @@
 extern "C" {
 #endif
 
+typedef enum{
+    LCD_CURSOR_INVISIBLE = 0,   /*!< */
+    LCD_CURSOR_UNDERSCORE,  /*!< */
+    LCD_CURSOR_UNDERSCORE_BLINK, /*!< */
+    LCD_CURSOR_BLINK    /*!< */
+} lcd_i2c_cursor_style_t;
+
+typedef enum{
+    LCD_SHIFT_LEFT = 0,   /*!< */
+    LCD_SHIFT_RIGHT /*!< */
+} lcd_i2c_shift_display_t;
+
+typedef enum{
+    LCD_1602 = 0,   /*!< */
+    LCD_2004    /*!< */
+} lcd_type_t;
+
 typedef struct
 {
-    i2cbus_t bus;
-    bool started;
-    bool backlight;
+    i2cbus_t bus;   /*!< */
+    lcd_type_t type;    /*!< */
+    bool backlight; /*!< */
+    bool started;   /*!< */
 } lcd_i2c_t;
 
 /**
@@ -56,7 +74,7 @@ typedef struct
  *     - ESP_OK: success
  *     - ESP_FAIL: fail to start
  */
-esp_err_t lcd_i2c_init(lcd_i2c_t *lcd, i2c_port_t port, uint8_t addr);
+esp_err_t lcd_i2c_init(lcd_i2c_t *lcd, i2c_port_t port, uint8_t addr, lcd_type_t lcd_type);
 
 /**
  * @brief Create a new device on bus
@@ -112,6 +130,28 @@ esp_err_t lcd_i2c_set_backlight(lcd_i2c_t *lcd, bool bkl_status);
  *     - ESP_FAIL: fail to start
  */
 esp_err_t lcd_i2c_set_cursor(lcd_i2c_t *lcd, uint8_t col, uint8_t row);
+
+/**
+ * @brief Create a new device on bus
+ * 
+ * @param dev pointer to device configurations
+ *
+ * @return 
+ *     - ESP_OK: success
+ *     - ESP_FAIL: fail to start
+ */
+esp_err_t lcd_i2c_set_cursor_style(lcd_i2c_t *lcd, lcd_i2c_cursor_style_t style);
+
+/**
+ * @brief Create a new device on bus
+ * 
+ * @param dev pointer to device configurations
+ *
+ * @return 
+ *     - ESP_OK: success
+ *     - ESP_FAIL: fail to start
+ */
+esp_err_t lcd_i2c_shift_display(lcd_i2c_t *lcd, lcd_i2c_shift_display_t direction);
 
 
 /**@}*/

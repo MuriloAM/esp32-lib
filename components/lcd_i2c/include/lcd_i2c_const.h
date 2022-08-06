@@ -60,13 +60,14 @@ extern "C" {
 #define LCD_WRITE_TO_LEFT   0x04
 #define LCD_WRITE_TO_RIGHT  0x06
 
-#define LCD_CURSOR_ON   0x0E
-#define LCD_CURSOR_OFF  0x0C
 #define LCD_CURSOR_MOVE_LEFT    0x10
 #define LCD_CURSOR_MOVE_RIGHT   0x14
 #define LCD_CURSOR_HOME 0x02
-#define LCD_CURSOR_BLINK    0x0D
-#define LCD_CURSOR_BLINK2   0x0F
+
+#define LCD_CURSOR_OFF  0x0C
+#define LCD_CURSOR_UND  0x0E
+#define LCD_CURSOR_UND_BLK    0x0F
+#define LCD_CURSOR_BLK    0x0D
 
 #define LCD_DISPLAY_MOVE_LEFT   0x18
 #define LCD_DISPLAY_MOVE_RIGHT  0x1C
@@ -83,7 +84,11 @@ extern "C" {
 #define LCD_CONFIG_4BIT_2LINE_5X10  0x28
 
 #define LCD_SET_CGRAM_ADDR  0x40
-#define LCD_SET_DDRAM_ADDR  0x80
+#define LCD_DDRAM_ADDR  0x80
+
+// LCD DDRAM LINE CONTROL
+#define LCD_2004_MAX_COL 0x13
+#define LCD_1602_MAX_COL 0x27
 
 #define LCD_MAX_NUM CONFIG_LCD_MAX_NUM      /*<! maximum display on i2c bus */
 
@@ -103,7 +108,7 @@ typedef enum{
     LCD_I2C_DATA = 1            /*!< LCD data register access */
 } lcd_i2c_reg_t;
 
-#define LCD_MAX_NUM CONFIG_LCD_MAX_NUM      /*<! maximum display on i2c bus */
+static const uint8_t lcd_line[] = {0x00, 0x40, 0x14, 0x54};
 
 /**@}*/
 

@@ -88,13 +88,14 @@ esp_err_t _lcd_i2c_write(lcd_i2c_t *lcd, uint8_t data, lcd_i2c_reg_t lcd_reg)
     return ESP_OK;
 }
 
-esp_err_t lcd_i2c_init(lcd_i2c_t *lcd, i2c_port_t port, uint8_t addr)
+esp_err_t lcd_i2c_init(lcd_i2c_t *lcd, i2c_port_t port, uint8_t addr, lcd_type_t lcd_type)
 {
     // create lcd mutex semaphore, return fail if can't create.
     if (i2cbus_create(&lcd->bus, port, addr) != ESP_OK)
         return ESP_FAIL;
     
     lcd->backlight = true;
+    lcd->type = lcd_type;
 
     if (lcd != NULL) {
         // See if we can obtain the semaphore.  If the semaphore is not available
@@ -126,12 +127,6 @@ esp_err_t lcd_i2c_init(lcd_i2c_t *lcd, i2c_port_t port, uint8_t addr)
 
             // We have finished accessing the shared resource.  Release the
             // semaphore.
-
-            _lcd_i2c_write(lcd, LCD_CURSOR_ON, LCD_I2C_INSTRUCTION);
-            _lcd_i2c_write(lcd, 'A', LCD_I2C_DATA);
-            _lcd_i2c_write(lcd, 'B', LCD_I2C_DATA);
-            _lcd_i2c_write(lcd, LCD_CURSOR_MOVE_RIGHT, LCD_I2C_INSTRUCTION);
-
             xSemaphoreGive(lcd->bus.mutex);
         }
         else {
@@ -207,8 +202,11 @@ esp_err_t lcd_i2c_write(lcd_i2c_t *lcd, const char *data)
         if (xSemaphoreTake(lcd->bus.mutex, pdMS_TO_TICKS(lcd->bus.time_out)) == pdTRUE) {
             // We were able to obtain the semaphore and can now access the
             // shared resource.
-            
-            // _lcd_i2c_write(lcd, LCD_CONFIG_4BIT_2LINE_5X8, LCD_I2C_INSTRUCTION);
+
+            while (*data) {
+                _lcd_i2c_write(lcd, *data, LCD_I2C_DATA);
+                data++;
+            }
             
             // We have finished accessing the shared resource.  Release the
             // semaphore.
@@ -267,9 +265,94 @@ esp_err_t lcd_i2c_set_cursor(lcd_i2c_t *lcd, uint8_t col, uint8_t row)
         if (xSemaphoreTake(lcd->bus.mutex, pdMS_TO_TICKS(lcd->bus.time_out)) == pdTRUE) {
             // We were able to obtain the semaphore and can now access the
             // shared resource.
+
+            // col can't reach out last display's column address, it makes 
+            // cursor jump to another line.
+            if (lcd->type) {
+                if (col > LCD_2004_MAX_COL)
+                    col = LCD_2004_MAX_COL;
+            } else {
+                if (col > LCD_1602_MAX_COL)
+                    col = LCD_1602_MAX_COL;
+            }
+
+            // set DDRAM address.
+            _lcd_i2c_write(lcd, (LCD_DDRAM_ADDR + col + lcd_line[row]), LCD_I2C_INSTRUCTION);
             
-            // _lcd_i2c_write(lcd, LCD_CONFIG_4BIT_2LINE_5X8, LCD_I2C_INSTRUCTION);
-            
+            // We have finished accessing the shared resource.  Release the
+            // semaphore.
+            xSemaphoreGive(lcd->bus.mutex);
+        }
+        else {
+            // We could not obtain the semaphore and can therefore not access
+            // the shared resource safely.
+            return ESP_ERR_TIMEOUT;
+        }
+    } else {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return ESP_OK;
+}
+
+esp_err_t lcd_i2c_set_cursor_style(lcd_i2c_t *lcd, lcd_i2c_cursor_style_t style)
+{
+    if (lcd != NULL) {
+        // See if we can obtain the semaphore.  If the semaphore is not available
+        // wait 10 ticks to see if it becomes free.
+        if (xSemaphoreTake(lcd->bus.mutex, pdMS_TO_TICKS(lcd->bus.time_out)) == pdTRUE) {
+            // We were able to obtain the semaphore and can now access the
+            // shared resource.
+            switch(style) {
+                case LCD_CURSOR_INVISIBLE:
+                    _lcd_i2c_write(lcd, LCD_CURSOR_OFF, LCD_I2C_INSTRUCTION);
+                break;
+                case LCD_CURSOR_UNDERSCORE:
+                    _lcd_i2c_write(lcd, LCD_CURSOR_UND, LCD_I2C_INSTRUCTION);
+                break;
+                case LCD_CURSOR_UNDERSCORE_BLINK:
+                    _lcd_i2c_write(lcd, LCD_CURSOR_UND_BLK, LCD_I2C_INSTRUCTION);
+                break;
+                case LCD_CURSOR_BLINK:
+                    _lcd_i2c_write(lcd, LCD_CURSOR_BLK, LCD_I2C_INSTRUCTION);
+                break;
+                default:
+                break;
+            }
+
+            // We have finished accessing the shared resource.  Release the
+            // semaphore.
+            xSemaphoreGive(lcd->bus.mutex);
+        }
+        else {
+            // We could not obtain the semaphore and can therefore not access
+            // the shared resource safely.
+            return ESP_ERR_TIMEOUT;
+        }
+    } else {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return ESP_OK;
+}
+
+esp_err_t lcd_i2c_shift_display(lcd_i2c_t *lcd, lcd_i2c_shift_display_t direction)
+{
+    if (lcd != NULL) {
+        // See if we can obtain the semaphore.  If the semaphore is not available
+        // wait 10 ticks to see if it becomes free.
+        if (xSemaphoreTake(lcd->bus.mutex, pdMS_TO_TICKS(lcd->bus.time_out)) == pdTRUE) {
+            // We were able to obtain the semaphore and can now access the
+            // shared resource.
+            switch(direction) {
+                case LCD_SHIFT_LEFT:
+                    _lcd_i2c_write(lcd, LCD_DISPLAY_MOVE_LEFT, LCD_I2C_INSTRUCTION);
+                break;
+                case LCD_SHIFT_RIGHT:
+                    _lcd_i2c_write(lcd, LCD_DISPLAY_MOVE_RIGHT, LCD_I2C_INSTRUCTION);
+                break;
+                default:
+                break;
+            }
+
             // We have finished accessing the shared resource.  Release the
             // semaphore.
             xSemaphoreGive(lcd->bus.mutex);
